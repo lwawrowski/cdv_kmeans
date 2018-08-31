@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Segmentacja klientów</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Łukasz Wawrowski" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Segmentacja klientów
+## z wykorzystaniem narzędzi Big Data
+### Łukasz Wawrowski
+### 4-09-2018
+
+---
+
+
+
+
+# Plan szkolenia
+
+1. Środowisko pracy - R
+
+--
+
+2. Segmentacja klientów
+
+--
+
+3. Metoda k-średnich
+
+--
+
+4. Case study w R
+
+---
+class: inverse, center, middle
+
+# Why R?
+
+---
+
+# R to możliwości
+
+Środowisko do obliczeń statystycznych i wizualizacji wyników.
+
+- darmowy
+
+--
+
+- prawie 13 000 rozszerzeń (pakietów)
+
+--
+
+- wsparcie społeczności
+
+--
+
+- wszechstronny
+
+--
+
+   - obliczenia i wizualizacje
+   - raporty
+   - interaktywne dashboardy
+   - strony internetowe
+   - prezentacje
+   - mapy
+   - ...
+
+---
+
+# R to język do analizy danych
+
+IEEE Language Rankings 2018
+
+&lt;center&gt;&lt;img src = "img/ranking.png" height = "300px" /&gt;&lt;/center&gt;
+
+11 - Matlab, 24 - SQL, 32 - Julia, 40 - SAS
+
+[http://blog.revolutionanalytics.com/2018/08/ieee-language-rankings-2018.html](http://blog.revolutionanalytics.com/2018/08/ieee-language-rankings-2018.html)
+
+---
+
+# R to program
+
+Do pobrania ze strony: [R-project](https://www.r-project.org/)
+
+&lt;center&gt;&lt;img src = "img/r.png" height = "400px" /&gt;&lt;/center&gt;
+
+---
+
+# RStudio to wygoda
+
+Do pobrania ze strony: [RStudio](https://www.rstudio.com/)
+
+&lt;center&gt;&lt;img src = "img/rstudio.png" height = "400px" /&gt;&lt;/center&gt;
+
+---
+
+# Materiały do zajęć
+
+1. Wejdź na stronę: [https://github.com/lwawrowski/cdv_kmeans](https://github.com/lwawrowski/cdv_kmeans)
+2. Kliknij zielony przycisk __Clone or download__ i skopiuj link
+3. Otwórz RStudio
+4. W prawym górnym roku wybierz __New project__, a następnie __Version control__
+5. W kolejnym kroku wybierz pozycję __Git__ i wklej skopiowany link
+6. Kliknij przycisk __Create project__
+
+---
+
+# Struktura projektu
+
+- data - katalog z danymi
+   - klienci.csv
+   - zywoploty.xlsx
+- img - grafiki z prezentacji
+- libs - bibilioteki do prezentacji
+- prezentacja.html - plik wynikowy prezentacji
+- prezentacja.Rmd - plik źródłowy prezentacji
+- 01_skrypt.R - program w R
+- 02_raport.Rmd - raport w R
+- 03_segementacja.Rmd - case study
+
+---
+
+# R jako kalkulator
+
+Proszę otworzyć plik __01_skrypt.R__
+
+---
+
+# Funkcje w R
+
+R jest wrażliwy na wielkość liter.
+
+
+```r
+sqrt(25)
+```
+
+```
+## [1] 5
+```
+
+
+```r
+SQRT(25)
+```
+
+```
+## Error in SQRT(25): could not find function "SQRT"
+```
+
+Zatem do pierwiastkowania wykorzystamy funkcję z pierwszego przykładu.
+
+---
+
+# Przechowywanie danych
+
+Do R można wczytać dane z dowolnego źródła, ale podstawowym elementem każdego obiektu jest wektor.
+
+Wektor tworzy się z wykorzystaniem funkcji `c()`.
+
+Wektor zawierający oceny ze studiów:
+
+
+```r
+c(5,5,4,4.5,3.5,5,6)
+```
+
+```
+## [1] 5.0 5.0 4.0 4.5 3.5 5.0 6.0
+```
+
+Policzmy średnią:
+
+
+```r
+oceny &lt;- c(5,5,4,4.5,3.5,5,6)
+mean(oceny)
+```
+
+```
+## [1] 4.714286
+```
+
+---
+
+# Zadanie nr 1 (5 min)
+
+Dla wcześniej zdefiniowanych ocen oblicz medianę.
+
+--
+
+_Wskazówka:_
+
+Korzystając z google zapytanie najlepiej formułować w następujący sposób:
+
+_r calculate mean_
+
+---
+
+# R jako narzędzie do raportowania
+
+Połączenie języka __R__ i __markdown__ umożliwia tworzenie dynamicznych raportów, które można eksportować do plików:
+
+- html,
+- pdf (potrzebny [MiKTeX](https://miktex.org/)),
+- docx.
+
+Zajrzyjmy do pliku __02_raport.Rmd__
+
+---
+
+# Markdown - tekst
+
+Większość raportu będzie stanowił zwykły tekst.
+
+.pull-left[
+__Kod__
+```
+To jest zwykły tekst.
+_Kursywa_ i __pogrubienie__.
+Enter nie wystarczy, żeby przejść  
+do nowej linii - trzeba wstawić  
+co najmniej __dwie spacje__.
+```
+]
+.pull-right[
+__Wynik__   
+  
+To jest zwykły tekst.  
+_Kursywa_ i __pogrubienie__.  
+Enter nie wystarczy, żeby przejść  
+do nowej linii - trzeba wstawić  
+co najmniej __dwie spacje__.
+]
+
+---
+
+# Nagłówki
+
+Struktura dokumentu definiowa jest przez nagłówki.
+
+__Kod__
+```
+# Nagłówek pierwszego stopnia
+## Nagłówek drugiego stopnia
+### Nagłówek trzeciego stopnia
+```
+
+__Wynik__   
+   
+# Nagłówek pierwszego stopnia
+## Nagłówek drugiego stopnia
+### Nagłówek trzeciego stopnia
+
+---
+# Listy
+
+.pull-left[
+__Kod__
+```
+1. Pozycja 1
+2. Pozycja 2
+3. Pozycja 3
+    - Pozycja 3a
+    - Pozycja 3b
+```
+]
+.pull-right[
+__Wynik__   
+   
+1. Pozycja 1
+2. Pozycja 2
+3. Pozycja 3
+    - Pozycja 3a
+    - Pozycja 3b
+
+]
+
+---
+
+# Linki
+
+Adresy stron internetowych automatycznie zamieniają się na linki. Można też stworzyć tekst, który będzie prowadził do strony.
+
+__Kod__
+```
+https://cdv.pl/
+
+[Collegium Da Vinci](https://cdv.pl/)
+```
+
+__Wynik__   
+   
+https://cdv.pl/
+
+[Collegium Da Vinci](https://cdv.pl/)
+
+---
+
+# Zadanie nr 2 (10 min)
+
+1. Zaokrąglij średnią długość żywopłotów w miastach do dwóch miejsc po przecinku.
+
+2. Przedstaw zmianę długości żywopłotów na wsi z wykorzystaniem wykresu liniowego.
+
+---
+class: inverse, center, middle
+
+# Segmentacja 
+
+---
+
+# Segmentacja
+
+Segmentacja/grupowanie/klasteryzacja/klasyfikacja czyli:
+
+podział zbioru obiektów na grupy obiektów podobnych. 
+
+W rezultacie:
+
+- obiekty znajdujące się w tym samym segmencie powinny być do siebie podobne,
+- obiekty znajdujące się w różnych segmentach powinny się od siebie różnić.
+
+---
+
+# Idea
+
+&lt;center&gt;&lt;img src = "img/segmentacja.jpg" height = "400px" /&gt;&lt;/center&gt;
+
+---
+
+# Etapy segmentacji
+
+- sformułowanie celu analizy
+- dobór cech
+- wybór metody segmentacji
+- przeprowadzenie segmentacji
+- weryfikacja wyników
+- interpretacja wyników
+
+---
+
+# Podobieństwo obiektów
+
+W statystyce miarą podobieństwa jest metryka np. euklidesowa lub miejska.
+
+Stosowanie metryk wymaga zapewnienia porównywalności różnych cech poprzez zastosowanie np. standaryzacji.
+
+Standaryzacja pozbawia cechy jednostek, w jakich są mierzone - ustalając średnią równą 0 i odchylenie standardowe równe 1.
+
+---
+
+# Metoda k-średnich
+
+Najpopularniejsza metoda grupowania obiektów, która efektywnie działa zarówno na małych, jak i dużych zbiorach.
+
+Wymaga zadeklarowania końcowej liczby segmentów.
+
+__Algorytm__
+
+1. Określ liczbę grup - `\(k\)`
+2. Dla każdej grupy ustal wyjściowy centroid
+3. Przypisz każdy obiekt do najbliższego centroidu
+4. Na podstawie przypisanych obiektów oblicz nowe współrzędne centroidu
+5. Sprawdź czy każdy obiekt przypisany jest do najbliższego centroidu
+6. Jeśli nie to zmień przypisanie obiektu do centrodu
+7. Jeśli nie obserwuje się żadnych przesunięć to algorytm się kończy
+
+---
+
+# Ustalanie liczby grup
+
+W metodzie k-średnich należy podać docelową liczbę skupień. Możemy spróbować ustalić tą wartość na podstawie wykresu osypiska (ang. _elbow method_).
+
+&lt;center&gt;&lt;img src = "img/elbow.png" height = "300px" /&gt;&lt;/center&gt;
+
+Wybieramy liczbę skupień po której nie następuje już gwałtowny spadek wartości wariancji wewnątrz-grupowej.
+
+---
+
+# Segmentacja klientów
+
+Bierzemy na warsztat plik __03_segmentacja.Rmd__
+
+---
+
+# Zadanie nr 3 (15 min)
+
+1. Ile wynosi średnia i odchylenie standardowe cech w zbiorze `cechy_z`?
+
+2. Zestaw ze sobą na wykresie roczny dochód, wskaźnik wydatków oraz segment.
+
+3. Usuń z analizy zmienną wiek - jaka jest optymalna liczba segmentów?
+
+
+---
+class: inverse, center, middle
+
+# Pytania?
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

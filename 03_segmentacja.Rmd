@@ -1,0 +1,70 @@
+---
+title: "Segmentacja klientów"
+author: "Imię i nazwisko"
+date: "4 września 2018"
+output: html_document
+---
+
+# Dane
+
+Opis zbioru:
+
+- klientID - identyfikator klienta
+- plec - płeć
+- wiek - wiek
+- roczny_dochod - roczny dochód wyrażony w tys. dolarów
+- wskaznik_wydatkow - klasyfikacja sklepu od 1 do 100
+
+```{r wczytanie danych}
+
+klienci <- read.csv("data/klienci.csv")
+summary(klienci)
+
+```
+
+# Cel analizy
+
+Segmentacja 200 klientów sklepu na homogeniczne grupy.
+
+# Dobór cech
+
+```{r}
+cechy <- klienci[,-c(1,2)] # usunięcie ID i płci
+cechy_z <- as.data.frame(scale(cechy)) # standaryzacja
+```
+
+# Segmentacja metodą k-średnich
+
+```{r}
+# install.packages("ClusterR")
+library(ClusterR)
+
+Optimal_Clusters_KMeans(cechy_z, max_clusters = 15, criterion = "WCSSE")
+```
+
+
+```{r}
+grupy_kmeans <- KMeans_rcpp(cechy_z, 4, initializer = "kmeans++")
+```
+
+# Weryfikacja wyników
+
+```{r}
+klienci$grupa <- grupy_kmeans$clusters
+```
+
+```{r}
+plot(x = klienci$wiek, y = klienci$roczny_dochod, pch = klienci$grupa)
+```
+
+# Interpretacja wyników
+
+```{r}
+# install.packages("dplyr")
+library(dplyr)
+
+klienci %>%
+  group_by(grupa) %>%
+  summarise_at(.vars = c("wiek", "roczny_dochod", "wskaznik_wydatkow"), mean)
+```
+

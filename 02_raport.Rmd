@@ -1,0 +1,29 @@
+---
+title: "Analiza żywopłotów"
+author: "Imię i nazwisko"
+date: "4 września 2018"
+output: html_document
+---
+
+# Wprowadzenie
+
+Gminy co roku zobowiązane są do przekazywania do Głównego Urzędu Statystycznego sprawozdań na temat stanu i ochrony środowiska. Jedną z raportowanych cech jest długość żywopłotów. Dane na ten temat dostępne są w [Banku Danych Lokalnych](https://bdl.stat.gov.pl/BDL/start) na poziomie powiatów. W raporcie zostaną przedstawione zmiany tego zjawiska w czasie.
+
+```{r pakiety i zbiór danych}
+# install.packages("readxl") # instalacja pakietu
+library(readxl) # wczytanie do pamięci
+
+dane <- read_xlsx("data/zywoploty.xlsx")
+summary(dane)
+
+```
+
+Zakres analizy obejmuje lata od `r min(dane$rok)` do `r max(dane$rok)`. W tym zakresie czasie w miastach średnio występuje `r mean(dane$zywoploty_miasta)` km. żywopłotów, a na wsi `r mean(dane$zywoploty_wies)` kilometrów.
+
+# Zmiany w czasie - miasta
+
+```{r zywoploty miasta}
+plot(x = dane$rok, y = dane$zywoploty_miasta, type = "p", xlab = "Rok", ylab = "Długość żywopłotu (w km)")
+```
+
+Długość żywopłotów w miastach z roku na rok rośnie. W roku 2004 wynosiła `r dane$zywoploty_miasta[dane$rok==2004]` kilometrów, a w ostatnim roku analizy tj. 2017 - `r dane$zywoploty_miasta[dane$rok==2017]` km.
